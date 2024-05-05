@@ -1,5 +1,8 @@
-192.168.0.105
+[web_servers]
 192.168.0.103
+
+[db_servers]
+192.168.0.105
 
 #192.168.0.103 apache_package=apache2 
 #192.168.0.105 apache_package=httpd
