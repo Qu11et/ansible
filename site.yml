@@ -5,26 +5,55 @@
   pre_tasks:
 
   - name: install update on Ubuntu
+    tags: always
     apt:
       upgrade: dist
       update_cache: yes
     when: ansible_distribution == "Ubuntu"
 
   - name: install update on CentOS
+    tags: always
     yum:
       update_only: yes
       update_cache: yes
     when: ansible_distribution == "CentOS"
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: create taile user
+    tags: user
+    user:
+      name: taile
+      groups: root
+
+  - name: add ssh key for taile
+    tags: user
+    authorized_key:
+      user: taile
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHFZK2ljsxL3fkdX8RzOzPhyEEl5ii1HyBh4lKrMxlCg ansible"
+
+  - name: add sudoers file for taile
+    tags: user
+    copy:
+      src: sudoer_taile
+      dest: /etc/sudoers.d/taile
+      owner: root
+      group: root
+      mode: 0440
 
 - hosts: workstations
   become: true
   tasks:
 
   - name: install unzip
+    tags: workstations
     package:
       name: unzip
 
   - name: install terraform
+    tags: workstations
     unarchive:
       src: https://releases.hashicorp.com/terraform/1.8.2/terraform_1.8.2_linux_amd64.zip
       dest: /usr/local/bin
@@ -38,6 +67,7 @@
   tasks:
 
   - name: install apache2 and php package on Ubuntu
+    tags: install
     apt:
       name:
         - apache2
@@ -46,7 +76,7 @@
     when: ansible_distribution == "Ubuntu"
 
   - name: copy default html file for site
-    tags: apache
+    tags: copy
     copy:
      src: default_site.html
      dest: /var/www/html/index.html
@@ -59,6 +89,7 @@
   tasks:
 
   - name: start httpd on CentOS
+    tags: httpd
     service:
       name: httpd
       state: started
@@ -80,8 +111,8 @@
       state: restarted
     when: httpd_state.changed
 
-  - name: intsall mariadb package on CentOS
-    tags: mariadb
+  - name: install mariadb package on CentOS
+    tags: install
     yum:
       name: mariadb
       state: latest
