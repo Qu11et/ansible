@@ -4,3 +4,11 @@
       - "{{ apache_package_name }}"
       - "{{ php_package_name }}"
     state: latest
+
+- name: change email address for admin
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^ServerAdmin'
+    line: ServerAdmin lekhauhuutai@gmail.com
+  when: ansible_distribution == "CentOS"
+  notify: restart_apache
