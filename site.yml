@@ -4,44 +4,29 @@
   become: true
   pre_tasks:
 
-  - name: install update on Ubuntu
+  - name: install update on Ubuntu (update repo cache)
     tags: always
     apt:
-      upgrade: dist
       update_cache: yes
+    changed_when: false
     when: ansible_distribution == "Ubuntu"
 
-  - name: install update on CentOS
+  - name: install update on CentOS (update repo cache)
     tags: always
     yum:
-      update_only: yes
       update_cache: yes
+    changed_when: false
     when: ansible_distribution == "CentOS"
 
 - hosts: all
   become: true
   tasks:
 
-  - name: create taile user
-    tags: user
-    user:
-      name: taile
-      groups: root
-
   - name: add ssh key for taile
-    tags: user
+    tags: always
     authorized_key:
       user: taile
       key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHFZK2ljsxL3fkdX8RzOzPhyEEl5ii1HyBh4lKrMxlCg ansible"
-
-  - name: add sudoers file for taile
-    tags: user
-    copy:
-      src: sudoer_taile
-      dest: /etc/sudoers.d/taile
-      owner: root
-      group: root
-      mode: 0440
 
 - hosts: workstations
   become: true
