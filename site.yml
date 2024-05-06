@@ -58,9 +58,32 @@
   become: true
   tasks:
 
+  - name: start httpd on CentOS
+    service:
+      name: httpd
+      state: started
+    when: ansible_distribution == "CentOS"
+
+  - name: change e-mail address for admin
+    tags: httpd
+    lineinfile:
+      path: /etc/httpd/conf/httpd.conf
+      regexp: '^ServerAdmin'
+      line: ServerAdmin lekhauhuutai48@gmail.com
+    when: ansible_distribution == "CentOS"
+    register: httpd_state
+
+  - name: restart httpd on CentOS
+    tags: httpd
+    service:
+      name: httpd
+      state: restarted
+    when: httpd_state.changed
+
   - name: intsall mariadb package on CentOS
     tags: mariadb
     yum:
       name: mariadb
       state: latest
+      enabled: yes
     when: ansible_distribution == "CentOS"
