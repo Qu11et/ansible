@@ -1,0 +1,4 @@
+- name: add ssh key for taile
+  authorized_key:
+    user: taile
+    key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHFZK2ljsxL3fkdX8RzOzPhyEEl5ii1HyBh4lKrMxlCg ansible"
