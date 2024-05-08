@@ -66,6 +66,7 @@
     template:
       src: files/landing-page.html.j2
       dest: /var/www/html/index.html
+    notify: restart apache
 
   - name: Allow all access to tcp port 80
     tags: ubuntu,http
@@ -73,6 +74,13 @@
       rule: allow
       port: '80'
       proto: tcp
+    when: ansible_distribution == "Ubuntu"
+
+  handlers:
+  - name: restart apache
+    service:
+      name: apache2
+      state: restarted
 
 - hosts: web_servers_centos
   become: true
@@ -89,8 +97,6 @@
         - php
         - firewalld
       state: latest
-    notify:
-        -  start httpd and firewalld on CentOS
     when: ansible_distribution == "CentOS"
 
   - name: start httpd on CentOS
@@ -113,6 +119,7 @@
     template:
       src: files/landing-page.html.j2
       dest: /var/www/html/index.html
+    notify: restart httpd
 
   - name: Allow all access to tcp port 80 using firewalld
     tags: centos,http.firewall
@@ -121,20 +128,11 @@
       port: 80/tcp
       permanent: true
       state: enabled
-
-  - name: change e-mail address for admin
-    tags: email,centos
-    lineinfile:
-      path: /etc/httpd/conf/httpd.conf
-      regexp: '^ServerAdmin'
-      line: ServerAdmin lekhauhuutai48@gmail.com
     when: ansible_distribution == "CentOS"
-    register: httpd_state
 
-  - name: restart httpd on CentOS
-    tags: email,centos
+  handlers:
+  - name: restart httpd
     service:
       name: httpd
       state: restarted
-    when: httpd_state.changed
 
