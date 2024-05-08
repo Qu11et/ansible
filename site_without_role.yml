@@ -65,7 +65,7 @@
     tags: ubuntu,http
     template:
       src: files/landing-page.html.j2
-      dest: var/www/html/index.html
+      dest: /var/www/html/index.html
 
   - name: Allow all access to tcp port 80
     tags: ubuntu,http
@@ -76,15 +76,21 @@
 
 - hosts: web_servers_centos
   become: true
+  vars:
+    page_title: My CentOS Page
+    page_description: This is my CentOS page description.
   tasks:
 
-  - name: install httpd and php package on CentOS
-    tags: centos,http
+  - name: install httpd and php and firewalld package on CentOS
+    tags: centos,http,firewall
     yum:
       name:
         - httpd
         - php
+        - firewalld
       state: latest
+    notify:
+        -  start httpd and firewalld on CentOS
     when: ansible_distribution == "CentOS"
 
   - name: start httpd on CentOS
@@ -94,18 +100,27 @@
       state: started
     when: ansible_distribution == "CentOS"
 
+  - name: start and enable firewalld on CentOS
+    tags: centos,http,firewall
+    service:
+      name: firewalld
+      state: started
+      enabled: yes
+    when: ansible_distribution == "CentOS"
+
   - name: apply page template for CentOS server
-    tags: centos,http
+    tags: centos,http,firewall
     template:
       src: files/landing-page.html.j2
-      dest: var/www/html/index.html
+      dest: /var/www/html/index.html
 
-  - name: Allow all access to tcp port 80
-    tags: centos,http
-    ufw:
-      rule: allow
-      port: '80'
-      proto: tcp
+  - name: Allow all access to tcp port 80 using firewalld
+    tags: centos,http.firewall
+    firewalld:
+      zone: public
+      port: 80/tcp
+      permanent: true
+      state: enabled
 
   - name: change e-mail address for admin
     tags: email,centos
