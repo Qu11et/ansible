@@ -5,13 +5,22 @@
   tasks:
 
   - name: remove apache2 package on Ubuntu
+    tags: apache2
     apt:
       name: apache2
       state: absent
     when: ansible_distribution == "Ubuntu"
 
   - name: remove apache2 package on CentOS
+    tags: httpd
     yum:
       name: httpd
+      state: absent
+    when: ansible_distribution == "CentOS"
+
+  - name: remove mariadb package on CentOS
+    tags: mariadb
+    yum:
+      name: mariadb
       state: absent
     when: ansible_distribution == "CentOS"
